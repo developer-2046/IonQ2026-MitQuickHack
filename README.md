@@ -1,144 +1,44 @@
-# iQuHack 2026 - Quantum Entanglement Distillation Game
+# iQuHACK 2026 Challenge Solution - Team theLion
 
-Please, submit your results using the following link: https://forms.gle/ReUmUwEoQ2qw7PNs8
+**Team Lead:** Yuvraj Malik  
+**Members:** Nicholas Bo You Chin, Niguun Soyombo-erdene, Sho Sakaue, Coleman Rohde
 
-A competitive quantum networking game where players build subgraphs by claiming edges through entanglement distillation.
+## Overview
+This repository contains our winning solution for the IonQ Entanglement Distillation challenge at iQuHACK 2026. We successfully captured **30/30 nodes** in the network (Complete Domination) using a custom LOCC-compliant distillation protocol and an autonomous game agent.
 
-## Quick Start
+## Key Features
 
-### 1. Install Dependencies
+### 1. LOCC Distillation Circuit (`solution.py`)
+We implemented a variation of the **DEJMPS** purification protocol specifically adapted for the game's LOCC constraints:
+- **Qubit Layout:** Alice controls qubits $0 \dots k-1$, Bob controls $k \dots 2k-1$.
+- **Flag-based Post-selection:** Uses classical feedforward to compute parity checks (`c[i] ^ c[j]`) across distributed ancilla pairs. The server is instructed to post-select on the perfect correlation flag.
+- **Variable Precision:** The generator supports any number of Bell pairs ($k$), allowing dynamic trade-offs between cost and fidelity.
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### 2. Start Playing
-
-Open `demo.ipynb` in Jupyter or VS Code:
-
-```bash
-jupyter notebook demo.ipynb
-```
-
-The notebook walks you through registration, gameplay, and circuit design.
-
----
-
-## Game Overview
-
-**Objective**: Build a quantum network subgraph to maximize your score.
-
-**How It Works**:
-1. Register with a unique player ID
-2. Select a starting node from candidates
-3. Design distillation circuits to improve noisy Bell pair fidelity
-4. Claim edges by beating fidelity thresholds
-5. Earn points from nodes with utility qubits
-6. Manage your limited bell pair budget
-
-**Key Mechanics**:
-- **Graph**: Quantum network with nodes (utility qubits) and edges (entanglement links)
-- **Distillation**: Submit circuits to purify noisy Bell pairs
-- **Thresholds**: Achieve fidelity >= threshold to claim an edge
-- **Budget**: Limited bell pairs for distillation attempts
-- **Scoring**: Sum of utility qubits from owned nodes
-
----
+### 2. Autonomous Agent (`auto_player.py`)
+Our `AutoPlayer` bot systematically dominates the graph with a "Thrifty Expansion" strategy:
+- **Adaptive Budgeting:** It first attempts to claim edges using only $k=2$ pairs (Cost: 2). It scales up to expensive circuits ($k=3, 4$) *only* if fidelity thresholds are not met, saving significant resources.
+- **Sustainability First:** Properly weighs nodes with **Bonus Bell Pairs** as top priority, effectively ensuring the budget never runs out.
+- **Smart Queueing:** Identifies all "Frontier" edges (connecting Owned $\to$ Unowned nodes) and ranks them by a custom utility score derived from game mechanics.
 
 ## Repository Structure
+- `solution.py`: Core quantum circuit generation logic (Qiskit).
+- `auto_player.py`: The autonomous bot script.
+- `report.pdf`: Detailed submission report with strategy description and visualizations.
+- `generate_viz.py`: Helper script used to generate circuit diagrams.
+- `client.py`: The provided game client interface.
 
-```
-iQuHack2026/
-├── demo.ipynb         # Interactive tutorial - START HERE
-├── client.py          # GameClient class (API wrapper)
-├── visualization.py   # GraphTool class (graph rendering)
-├── game_handbook.md   # Detailed game rules
-├── requirements.txt   # Python dependencies
-└── README.md          # This file
-```
-
----
-
-## SDK Usage
-
-### GameClient
+## Usage
+To run the bot in the competition environment (Jupyter Notebook):
 
 ```python
-from client import GameClient
+from auto_player import AutoPlayer
 
-client = GameClient()
-result = client.register("player_id", "Name", location="remote")
+# Assuming 'client' is already authenticated
+bot = AutoPlayer(client)
 
-# Select starting node
-client.select_starting_node(node_id)
-
-# Get claimable edges
-claimable = client.get_claimable_edges()
-
-# Claim an edge with a circuit
-result = client.claim_edge(edge, circuit, flag_bit, num_bell_pairs)
-
-# Check status
-client.print_status()
-```
-
-### GraphTool
-
-```python
-from visualization import GraphTool
-
-viz = GraphTool(client.get_cached_graph())
-owned = set(status.get('owned_nodes', []))
-
-# Render focused view (nodes within 2 hops)
-viz.render(owned, radius=2)
-
-# Text summary
-viz.print_summary(owned)
+# Run the automation loop
+bot.run_loop()
 ```
 
 ---
-
-## API Endpoints
-
-Base URL: `https://demo-entanglement-distillation-qfhvrahfcq-uc.a.run.app`
-
-**Public**:
-- `GET /v1/graph` - Get graph structure
-- `GET /v1/leaderboard` - Get player rankings
-
-**Protected** (Bearer token required):
-- `POST /v1/register` - Register player (returns api_token)
-- `POST /v1/select_starting_node` - Choose starting node
-- `POST /v1/claim_edge` - Submit distillation circuit
-- `GET /v1/status/{player_id}` - Get player status
-- `POST /v1/restart` - Reset progress
-
----
-
-## Strategy Tips
-
-1. **Starting Node**: Balance utility qubits vs. bonus bell pairs
-2. **Edge Claiming**: Start with low-difficulty edges
-3. **Circuit Design**: More bell pairs improve fidelity but cost more budget
-4. **Budget**: Failed attempts are free - only successful claims cost bell pairs
-
----
-
-## Troubleshooting
-
-**"Module not found"**: Run `pip install -r requirements.txt`
-
-**"Invalid token"**: Re-register or use saved session token
-
-**Visualization not showing**: Install matplotlib: `pip install matplotlib`
-
----
-
-## Support
-
-See `demo.ipynb` for comprehensive examples. For issues, check the game handbook or ask the organizers.
-
-Good luck!
+*Created for iQuHACK 2026.*
