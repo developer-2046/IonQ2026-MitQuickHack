@@ -1,5 +1,7 @@
 # iQuHack 2026 - Quantum Entanglement Distillation Game
 
+Please, submit your results using the following link: https://forms.gle/ReUmUwEoQ2qw7PNs8
+
 A competitive quantum networking game where players build subgraphs by claiming edges through entanglement distillation.
 
 ## Quick Start
