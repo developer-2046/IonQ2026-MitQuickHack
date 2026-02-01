@@ -1,5 +1,5 @@
-.mypy_cache/
-.vscode/
+venv/
 __pycache__/
-*venv*/
-.iquhack_profile.json
+*.pyc
+.ipynb_checkpoints/
+.DS_Store

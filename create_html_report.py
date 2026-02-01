@@ -1,0 +1,102 @@
+import base64
+import os
+
+def image_to_base64(path):
+    with open(path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+def generate_html_report():
+    # Read Markdown content (simplified handling)
+    # We will just structure the HTML manually to ensure it looks good
+    
+    # Load Image Data
+    img_k2 = image_to_base64("/home/yuvi/2026-IonQ/circuit_k2.png")
+    img_k3 = image_to_base64("/home/yuvi/2026-IonQ/circuit_k3.png")
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>iQuHACK 2026 Report - theLion</title>
+        <style>
+            body {{ font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; max_width: 800px; margin: 0 auto; padding: 20px; }}
+            h1 {{ color: #2c3e50; border-bottom: 2px solid #eee; }}
+            h2 {{ color: #16a085; margin-top: 30px; }}
+            h3 {{ color: #7f8c8d; }}
+            img {{ max-width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 5px; }}
+            code {{ background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: Consolas, monospace; }}
+            .footer {{ margin-top: 50px; font-size: 0.8em; color: #777; text-align: center; }}
+            .circuit-box {{ background: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 5px solid #16a085; }}
+        </style>
+    </head>
+    <body>
+        <h1>iQuHACK 2026 IonQ Challenge Report</h1>
+        <p><strong>Team:</strong> theLion<br>
+        <strong>Team Lead:</strong> Yuvraj Malik<br>
+        <strong>Team Members:</strong> Nicholas Bo You Chin, Niguun Soyombo-erdene, Sho Sakaue, Coleman Rohde<br>
+        <strong>Result:</strong> 30/30 Nodes Captured (Complete Graph Dominance)</p>
+        
+        <h2>Executive Summary</h2>
+        <p>Our strategy combined a robust <strong>LOCC-compliant Entanglement Distillation protocol</strong> with an <strong>autonomous, budget-aware agent</strong> to systematically capture the network. By prioritizing self-sustainability (nodes with bonus bell pairs) and using adaptive resource allocation, we maximized territory while maintaining a distinct advantage over competitors.</p>
+        
+        <h2>1. Entanglement Distillation Methodology</h2>
+        <p>We implemented a variation of the <strong>DEJMPS</strong> protocol, adapted for the specific LOCC constraints of the challenge.</p>
+        
+        <h3>Circuit Design</h3>
+        <ul>
+            <li><strong>Alice's Qubits:</strong> 0 to k-1</li>
+            <li><strong>Bob's Qubits:</strong> k to 2k-1</li>
+            <li><strong>Target Pair:</strong> Qubits (k-1) and k (The "innermost" pair)</li>
+            <li><strong>Ancilla Pairs:</strong> All other pairs</li>
+        </ul>
+        
+        <h3>Algorithm Steps</h3>
+        <ol>
+            <li><strong>Bit-Flip Correction (CNOTs):</strong> We apply local CNOT gates targeting the Ancilla pairs, controlled by the Target pair.</li>
+            <li><strong>Parity Measurement:</strong> Both parties measure their Ancilla qubits.</li>
+            <li><strong>Flag-based Post-Selection:</strong> We compute the parity check <code>Check = m_A ^ m_B</code>. If any pair fails (XOR result is 1), the distillation is flagged as failed.</li>
+        </ol>
+        
+        <div class="circuit-box">
+            <h3>Figure 1: Distillation Circuit for k=2 (1 Ancilla Pair)</h3>
+            <img src="data:image/png;base64,{img_k2}" alt="k=2 Circuit">
+            <p><em>Alice (q0, q1) and Bob (q2, q3) use pair (0,3) to purify (1,2).</em></p>
+        </div>
+
+        <div class="circuit-box">
+            <h3>Figure 2: Distillation Circuit for k=3 (2 Ancilla Pairs)</h3>
+            <img src="data:image/png;base64,{img_k3}" alt="k=3 Circuit">
+            <p><em>Two ancilla pairs are used to purify the central pair.</em></p>
+        </div>
+        
+        <h2>2. Autonomous Network Strategy</h2>
+        <p>To achieve 100% map coverage, we developed an <code>AutoPlayer</code> agent with the following heuristics:</p>
+        
+        <h3>Adaptive Resource Allocation ("Thrifty" Heuristic)</h3>
+        <p>The agent dynamically selects the number of Bell pairs (k):</p>
+        <ul>
+            <li>First attempt: <strong>k=2</strong> (Cost: 2). High fidelity often allows this cheapest option.</li>
+            <li>Fallback: Scale to <strong>k=3</strong> or <strong>k=4</strong> only if fidelity requirements are not met.</li>
+        </ul>
+        
+        <h3>Priority Queueing</h3>
+        <p>Edges were ranked by utility score:</p>
+        <pre>Score = (100 * BonusPairs) + UtilityQubits - (0.1 * Difficulty)</pre>
+        <ul>
+            <li><strong>Sustainability:</strong> Bonus Bell Pair nodes were critical to maintain a positive budget.</li>
+            <li><strong>Expansion:</strong> The agent always targeted nodes not currently owned.</li>
+        </ul>
+        
+        <div class="footer">
+            Generated by theLion for iQuHACK 2026.
+        </div>
+    </body>
+    </html>
+    """
+    
+    with open("/home/yuvi/2026-IonQ/report.html", "w") as f:
+        f.write(html_content)
+    print("Report generated: /home/yuvi/2026-IonQ/report.html")
+
+if __name__ == "__main__":
+    generate_html_report()
